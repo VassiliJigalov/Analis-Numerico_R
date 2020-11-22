@@ -31,5 +31,5 @@ biseccion=function(a,b,tol,N){
     return("No se cumple el teorema de bolzano")
   }
   }
-##me conviene elegir un intervalo[a,b] tan pequeño como sea posibles, a y b tienen que tener codominio de signo opuesto
+## me conviene elegir un intervalo[a,b] tan pequeño como sea posibles, a y b tienen que tener codominio de signo opuesto
 biseccion(-1,1,0.0005,100000)
