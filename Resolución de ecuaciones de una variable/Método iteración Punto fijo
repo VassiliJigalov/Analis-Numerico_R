@@ -1,0 +1,28 @@
+#Metodo de iteracion de punto fijo 
+##tengo una funcion f(x)=0 , tengo que cambiarla a la forma de punto fijo x=g(x)
+##una vez que tengo mi g(x),me fijo que el dominio esta incluido en la imagen, o sea tengo el intervalo [1,2]entonces la imagen no tiene que salirse de [1,2]
+##a su vez el valor absoluto de la derivada debe ser menor,igual, a la derivada evaluada en b,lo cual indicaria la convergencia
+##x^3+4*x^2-10=0
+g=function(x){
+  x=1/2*(10-x^3)^(1/2)
+}
+
+
+
+
+puntofijo=function(p0,tol,N){
+  i=1
+  while(i<=N){
+    p=g(p0)
+    if(abs(p-p0)<tol){
+      return(p);
+      paste("el procedimiento fue exitoso")
+    }
+  
+  i=i+1
+  p0=p
+}
+  return(paste("el metodo fallo luego de",N,"iteraciones"))
+  
+}
+puntofijo(1.5,0.005,100)
