@@ -22,5 +22,5 @@ newton=function(p0,tol,n){
   }
   paste("el metodo fallo despues de",n,"iteraciones","n=",n)
 }
-a=newton(3*pi,0.005,100)
+a=newton(pi,0.005,100)
 a
