@@ -1,0 +1,26 @@
+##metodo de newton
+##necesitare la derivada de la funcion;para encontrar una solucion a f(x)=0 dada una aproximacion inicial p0:
+##Debemos tomar siempre como p0 un valor tal que f(p0 ) * f'(p0 )>0.
+f=function(x){
+  k=cos(x)-x
+}
+df=function(x){
+  k=-sin(x)-1
+}
+
+
+
+newton=function(p0,tol,n){
+  i=1
+  while (i<n) {
+    p=p0-f(p0)/df(p0)
+    if(abs(p-p0)<tol){
+      return(p)
+    }
+    i=i+1
+    p0=p
+  }
+  paste("el metodo fallo despues de",n,"iteraciones","n=",n)
+}
+a=newton(3*pi,0.005,100)
+a
