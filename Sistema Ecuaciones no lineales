@@ -1,0 +1,53 @@
+#Norma de un Vector ----
+Norma = function(y,metodo){
+  if(metodo==2){
+    return(sqrt(sum(y^2)))
+  }
+  if(metod0==Inf){
+    return(max(abs(y)))
+  }
+  return("El metodo debe ser 2 o Inf")
+}
+#Con 3 Funciones ----
+#Funciones y derivadas parciales ----
+f1 = function(x1,x2,x3){return(3*x1-cos(x2*x3)-0.5)}
+f2 = function(x1,x2,x3){return(x1^2-81*(x2+0.1)^2+sin(x3)+1.06)}
+f3 = function(x1,x2,x3){return(exp(-x1*x2)+20*x3-1+(10/3)*pi)}  
+
+df11 = function(x1,x2,x3){return(3)}
+df12 = function(x1,x2,x3){return(x3*sin(x2*x3))}
+df13 = function(x1,x2,x3){return(x2*sin(x2*x3))}
+
+df21 = function(x1,x2,x3){return(2*x1)}
+df22 = function(x1,x2,x3){return(-162*(x2+0.1))}
+df23 = function(x1,x2,x3){return(cos(x3))}
+
+df31 = function(x1,x2,x3){return(-x2*exp(-x1*x2))}
+df32 = function(x1,x2,x3){return(-x1*exp(-x1*x2))}
+df33 = function(x1,x2,x3){return(20)}
+
+#Algoritmo ----
+SENoL_Newton3 = function(x1,x2,x3,TOL,N){
+  for(i in 1:N){
+    #PASO 3
+    Jx = matrix(c(df11(x1,x2,x3),df12(x1,x2,x3),df13(x1,x2,x3),
+                  df21(x1,x2,x3),df22(x1,x2,x3),df23(x1,x2,x3),
+                  df31(x1,x2,x3),df32(x1,x2,x3),df33(x1,x2,x3)),ncol=3,byrow=T)
+    Fx = matrix(c(f1(x1,x2,x3),f2(x1,x2,x3),f3(x1,x2,x3)),ncol=1)
+    #PASO 4
+    H = solve(Jx)%*%-Fx
+    #PASO 5
+    x = c(x1,x2,x3) + t(H)
+    x1 = x[1]; x2 = x[2]; x3 = x[3]
+    #PASO 6
+    if(Norma(H,2) < TOL){
+      return(x)
+    }
+  } 
+  return(paste("El metodo fracaso despues de ",N," iteraciones. El ultimo x fue ",x,sep = ""))
+}
+aa = SENoL_Newton3(1,1,-1,10^-8,3) #pongo una tolerancia grande para que si o si haga las tres iteracinoes
+aa #x1=0.500528258195463 , x2 =0.0605207919642287 , x3=-0.52201846882724
+
+bb = SENoL_Newton3(1,1,-1,10^-6,100)
+bb
