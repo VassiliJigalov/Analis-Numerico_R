@@ -1,0 +1,129 @@
+
+set.seed(895955)
+datos = matrix(rnorm(3000,10,2),nrow = 1000, ncol = 3)
+A = round(cor(datos),4);
+B = matrix(round(rnorm(16,25,7),0),nrow = 4, ncol = 4)
+
+#a----
+Factorizacion_Cholesky = function(A){
+  #Metodo valido para matrices definidas positivas
+  n = nrow(A)
+  L = matrix(data=0,nrow=n,ncol=n,byrow=TRUE)
+  #Paso 1 ----
+  L[1,1] = (A[1,1])^(1/2)
+  #Paso 2 ----
+  for(j in 2:n){
+    L[j,1] = A[j,1]/L[1,1]
+  }
+  #Paso 3 ----
+  for(i in 2:(n-1)){
+    #Paso 4
+    sum = 0
+    for(k in 1:(i-1)){
+      sum = sum + L[i,k]^2
+    }
+    L[i,i] = (A[i,i]-sum)^(1/2)
+    #Paso 5
+    for (j in (i+1):n){
+      sum1 = 0
+      for(m in 1:(i-1)){
+        sum1 = sum1 + L[j,m]*L[i,m]
+      }
+      L[j,i] = (A[j,i] - sum1)/L[i,i]
+    }
+  }
+  #Paso 6 ----
+  sum2 = 0
+  for(k in 1:(n-1)){
+    sum2 = sum2 + L[n,k]^2
+  }
+  L[n,n] = (A[n,n] - sum2)^(1/2)
+  #Paso 7 ----
+  Lt = t(L)
+  resultados = list(L,Lt)
+  names(resultados) = c('L','Lt')
+  return(resultados)
+}
+bb = Factorizacion_Cholesky(A)
+bb
+#L
+#[,1]        [,2]      [,3]
+#[1,]  1.0000  0.00000000 0.0000000
+#[2,]  0.0289  0.99958231 0.0000000
+#[3,] -0.0072 -0.03950842 0.9991933
+
+#$Lt
+#[,1]      [,2]        [,3]
+#[1,]    1 0.0289000 -0.00720000
+#[2,]    0 0.9995823 -0.03950842
+#[3,]    0 0.0000000  0.99919330
+
+
+#b----
+Factorizacion_LU = function(A){
+  n = nrow(A)
+  L = matrix(data=0,nrow=n,ncol=n)
+  U = matrix(data=0,nrow=n,ncol=n)
+  for(i in 1:n){
+    L[i,i]=1
+  }
+  #PASO 1
+  if(A[1,1]==0){
+    return("Factorización imposible.")
+  }else{
+    U[1,1] = A[1,1]/L[1,1]
+  }
+  #PASO 2
+  for (j in 2:n){
+    U[1,j] = A[1,j]/L[1,1]
+    L[j,1] = A[j,1]/U[1,1]
+  }
+  #PASO 3 
+  for (i in 2:(n-1)){
+    #PASO 4
+    sum = 0
+    for(k in 1:(i-1)){
+      sum = sum+L[i,k]*U[k,i]
+    }
+    U[i,i] = A[i,i] - sum
+    if(U[i,i]==0){
+      return("Factorización imposible")
+    }
+    #PASO 5
+    for (j in (i+1):n){
+      sum2 = 0
+      for(k in 1:(i-1)){
+        sum2 = sum2+L[i,k]*U[k,j]
+      }
+      U[i,j] = (1/L[i,i])*(A[i,j]-sum2)
+      sum3 = 0
+      for(k in 1:(i-1)){
+        sum3 = sum3+L[j,k]*U[k,i]
+      }
+      L[j,i] = (1/U[i,i])*(A[j,i]-sum3)
+    }
+  }
+  #PASO 6
+  sum4 = 0
+  for(k in 1:(n-1)){
+    sum4 = sum4+L[n,k]*U[k,n]
+  }
+  U[n,n] = A[n,n] - sum4
+  #PASO 7 
+  return(list("L"=L, "U"=U))
+}
+aa = Factorizacion_LU(B)
+aa
+#$L
+#[,1]     [,2]      [,3] [,4]
+#[1,] 1.0000000 0.000000 0.0000000    0
+#[2,] 0.7083333 1.000000 0.0000000    0
+#[3,] 0.9583333 4.333333 1.0000000    0
+#[4,] 0.9166667 2.000000 0.4613309    1
+
+#$U
+#[,1] [,2]      [,3]       [,4]
+#[1,]   24   24  17.00000  19.000000
+#[2,]    0    3  16.95833   8.541667
+#[3,]    0    0 -61.77778 -26.222222
+#[4,]    0    0   0.00000 -10.402878
