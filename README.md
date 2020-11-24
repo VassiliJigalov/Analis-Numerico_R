@@ -8,3 +8,4 @@ Algoritmos de resolución de ejercicios númericos en R. Los algoritmos fueron o
   -Falsa Posicion<br />
  <b>Factorizacion Cholesky y LU</b><br />
  <b>Sistema de ecuaciones no Lineales(senol)</b><br />
+ <b>Interpolación: Newton, Larange, Cubic Splines</b><br />
