@@ -1,0 +1,484 @@
+#EJERCICIO 5
+a.	Escribir el polinomio interpolante de Newton, PN(x). 
+b.	Escribir el polinomio interpolante de Lagrange, PL(x).
+c.	Obtener dos aproximaciones de f(x) en x = 0.9, usando los polinomios PN(x) y PL(x) hallados en a. y b.
+d.	Graficar con puntos los pares (x,y) dados y dos curvas continuas con PN(x) en rojo y PL(x) en azul.
+e.	Escribir el Trazador Cúbico Natural, TC(x).
+f.	Calcular TC(0.9) y comparar con el punto c.
+g.	Agregar al gráfico del punto d. una curva continua de color verde con TC(x).
+h.	Sabiendo que los datos de la tabla se calcularon a partir de f(x) = (1+25*x^2)^(-1), agregue al gráfico una curva continua de color negro con f(x) y comente respecto de las interpolaciones realizadas.
+
+#a----
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+View(A)
+Dif_Div=function(A){
+  n=A[,1]  
+  m=A[,2]
+  b=2   #calculo de las diferencias div
+  k=nrow(A)-1
+  for(i in 1:k){
+    a=rep(0,nrow(A)) 
+    for(j in b:nrow(A)){  
+      a[j]=(m[j]-m[j-1])/(n[j]-n[j-ncol(A)+1])  
+    }
+    A=cbind(A,a) 
+    b=b+1
+    m=A[,2+i] 
+  }
+  return(A)
+}
+Dif_Div(A)
+A=Dif_Div(A)
+coef=NULL
+for(i in 1:nrow(A)){
+  coef = as.vector(c(coef,A[i,i+1]))
+}
+j=("(x-a)")
+e=c("1")
+u=c(coef[1])
+for(c in 2:length(coef)){
+  a=x[c-1]
+  e=paste(c(e,gsub("a",a,j)),collapse ="*") #gsub lo que hace es reemplazar "a" por la variable a en la variable j
+  u=c(u,paste(c(e,coef[c]),collapse = "*"))
+}
+e=parse(text=(paste(u,collapse="+"))) #parse devuelve pero sin valuarlo
+names(e)=c("f(x)")
+
+Ej5.a = e #este es el Polinomio de Lagrange escrito mediante la forma de diferencias divididas o Metodo de Newton
+Ej5.a
+
+
+
+#b----
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+View(A)
+
+#tengo una funcion que interpola, grafica y escribe el polinomio de lagrange
+
+#la voy a modificar para que solo haga la parte de escribir el polinomio
+
+P_Lagrange_SoloPol = function(A){
+  m=A[,1]
+  n=A[,2]
+  if(length(m)!=length(n)){
+    return("La cantidad de argumentos no coincide")
+  }
+  #Escribo el Polinomio de Lagrange
+  Ele = NULL
+  for(i in 1:length(m)){
+    Ele[i] = 1
+    for(j in 1:length(m)){
+      if(i!=j){
+        if(i!=length(m)){
+          if(i==1){
+            Ele[i] = paste("",Ele[i],"*((x-",m[j],")/(",m[i],"-",m[j],"))",sep = "")}
+          else{Ele[i] = paste("",Ele[i],"*((x-",m[j],")/(",m[i],"-",m[j],"))",sep = "")}
+        }
+        else{
+          Ele[i] = paste("",Ele[i],"*((x-",m[j],")/(",m[i],"-",m[j],"))",sep = "")
+        }
+      }
+    }
+  }
+  Pol = NULL
+  for(i in 1:length(m)){
+    if(i!=length(m)){
+      Pol = paste("",Pol,"",n[i],"*",Ele[i],"+",sep = "")
+    }
+    else{Pol = paste("",Pol,"",n[i],"*",Ele[i],sep = "")}
+  }
+  Pol=parse(text=paste("",Pol,sep = ""))
+  names(Pol) = paste("P",length(m)-1,"(x)",sep = "")
+  return(Pol)
+}
+Ej5.b = P_Lagrange_SoloPol(A)
+Ej5.b #El P8 implica porque es un polinomio de grado 8, dado que tenemos 9 puntos
+
+
+
+#c----
+#Para esto voy a usar la funcion que usa el polinomio de Lagrange e interpola
+#voy a modificar la funcion base para que lo haga
+P_Lagrange_SoloInterpola=function(A,xk){
+  m=A[,1]
+  n=A[,2]
+  if(length(m)!=length(n)){
+    return("La cantidad de argumentos no coincide")
+  }
+  #Ahora interpolo el punto xk deseado ----
+  interpolador=0
+  for(i in 1:length(m)){
+    u=1
+    v=1
+    l=n[i]
+    for(j in 1:length(m)){
+      if(i!=j){
+        u=u*(xk-m[j])
+        v=v*(m[i]-m[j])
+        l=l*(xk-m[j])/(m[i]-m[j])
+      }
+    }
+    interpolador=interpolador+l
+    names(interpolador)=c(paste("f(",xk,")",sep = ""))
+  }
+  return(interpolador)
+}
+
+
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+
+Ej5.c.L = P_Lagrange_SoloInterpola(A,0.9)
+Ej5.c.L
+#en el caso del polinomio de lagrange puedo copiar y pegar el polinomio que me escribe porque no hay redondeo
+#probemos si usaba el polinomio copaindo y pegando y comparemos
+
+Interpolo_a_partir_del_Polinomio = function(x){
+  return(0.0385*1*((x--0.75)/(-1--0.75))*((x--0.5)/(-1--0.5))*((x--0.25)/(-1--0.25))*((x-0)/(-1-0))*((x-0.25)/(-1-0.25))*
+           ((x-0.5)/(-1-0.5))*((x-0.75)/(-1-0.75))*((x-1)/(-1-1))+0.0664*1*((x--1)/(-0.75--1))*((x--0.5)/(-0.75--0.5))*
+           ((x--0.25)/(-0.75--0.25))*((x-0)/(-0.75-0))*((x-0.25)/(-0.75-0.25))*((x-0.5)/(-0.75-0.5))*((x-0.75)/(-0.75-0.75))*
+           ((x-1)/(-0.75-1))+0.1379*1*((x--1)/(-0.5--1))*((x--0.75)/(-0.5--0.75))*((x--0.25)/(-0.5--0.25))*((x-0)/(-0.5-0))*
+           ((x-0.25)/(-0.5-0.25))*((x-0.5)/(-0.5-0.5))*((x-0.75)/(-0.5-0.75))*((x-1)/(-0.5-1))+0.3902*1*((x--1)/(-0.25--1))*
+           ((x--0.75)/(-0.25--0.75))*((x--0.5)/(-0.25--0.5))*((x-0)/(-0.25-0))*((x-0.25)/(-0.25-0.25))*((x-0.5)/(-0.25-0.5))*
+           ((x-0.75)/(-0.25-0.75))*((x-1)/(-0.25-1))+1*1*((x--1)/(0--1))*((x--0.75)/(0--0.75))*((x--0.5)/(0--0.5))*
+           ((x--0.25)/(0--0.25))*((x-0.25)/(0-0.25))*((x-0.5)/(0-0.5))*((x-0.75)/(0-0.75))*((x-1)/(0-1))+0.3902*1*
+           ((x--1)/(0.25--1))*((x--0.75)/(0.25--0.75))*((x--0.5)/(0.25--0.5))*((x--0.25)/(0.25--0.25))*((x-0)/(0.25-0))*
+           ((x-0.5)/(0.25-0.5))*((x-0.75)/(0.25-0.75))*((x-1)/(0.25-1))+0.1379*1*((x--1)/(0.5--1))*((x--0.75)/(0.5--0.75))*
+           ((x--0.5)/(0.5--0.5))*((x--0.25)/(0.5--0.25))*((x-0)/(0.5-0))*((x-0.25)/(0.5-0.25))*((x-0.75)/(0.5-0.75))*
+           ((x-1)/(0.5-1))+0.0664*1*((x--1)/(0.75--1))*((x--0.75)/(0.75--0.75))*((x--0.5)/(0.75--0.5))*((x--0.25)/(0.75--0.25))*
+           ((x-0)/(0.75-0))*((x-0.25)/(0.75-0.25))*((x-0.5)/(0.75-0.5))*((x-1)/(0.75-1))+0.0385*1*((x--1)/(1--1))*
+           ((x--0.75)/(1--0.75))*((x--0.5)/(1--0.5))*((x--0.25)/(1--0.25))*((x-0)/(1-0))*((x-0.25)/(1-0.25))*
+           ((x-0.5)/(1-0.5))*((x-0.75)/(1-0.75)))
+}
+
+Ej5.c.L.vol2 = Interpolo_a_partir_del_Polinomio(0.9)
+#da igual
+
+#calculo mediante el polinomio de Newton
+#tambien voy a modificar la funcion que ya tengo de newton para que lo calcule
+
+#la modifico
+P_Newton_SoloInterpola = function(A,xk){
+  b=nrow(A)-1    #este fragmento del codigo se corresponde al calculo de las diferencias div.
+  n=A[,1]  
+  m=A[,2]
+  B=seq(n[1],n[length(n)],length.out = 1000)  #los valores sobre los cuales se interpolará para graficar. 
+  names=c("x","f(x)")
+  b=2   #calculo de las diferencias div
+  k=nrow(A)-1
+  for(i in 1:k){
+    a=rep(NA,nrow(A)) 
+    for(j in b:nrow(A)){  
+      a[j]=(m[j]-m[j-1])/(n[j]-n[j-ncol(A)+1])  
+    }
+    A=cbind(A,a) 
+    b=b+1
+    m=A[,2+i] 
+  }
+  coef=NULL
+  for(i in 1:nrow(A)){
+    coef = as.vector(c(coef,A[i,i+1]))
+  }
+  #Ahora se interpola el punto especificado. Lo anterior es meramente para graficar ----
+  interpolador=coef[1]  
+  for(f in 1:k){  
+    u=1  
+    for(p in 1:f){  
+      u=u*(xk-n[p]) 
+    }
+    interpolador=interpolador+(coef[f+1])*u
+  }
+  return(interpolador)
+}
+
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+
+
+Ej.5.c.N = P_Newton_SoloInterpola(A,0.9)
+Ej.5.c.N
+#da igual que con el polinomio de lagrange, como deberia suceder
+
+#aca no podria copiar y pegar el polinomio que me entrega la funcion que hice, porque redondea algunos numeros
+#por tanto puedo copiar y pegar pero modificar los coeficientes por los valores de las diferencias divididas exactas
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+A=Dif_Div(A)
+
+#  0.0385+1*(x--1)*0.1116+1*(x--1)*(x--0.75)*0.3488+1*(x--1)*(x--0.75)*(x--0.5)*1.46346666666667+
+#  1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*0.421333333333335+1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*-15.3028266666667+
+#  1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*(x-0.25)*38.1229511111111+
+#  1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*(x-0.25)*(x-0.5)*-53.694333968254+
+#  1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*(x-0.25)*(x-0.5)*(x-0.75)*53.694333968254
+#reemplazo los coeficientes por los valores de la diferencia dividida
+
+Interpolo_a_partir_del_Polinomio_de_Newton = function(x){
+  A[1,2]+1*(x--1)*A[2,3]+1*(x--1)*(x--0.75)*A[3,4]+1*(x--1)*(x--0.75)*(x--0.5)*A[4,5]+
+    1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*A[5,6]+1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*A[6,7]+
+    1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*(x-0.25)*A[7,8]+
+    1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*(x-0.25)*(x-0.5)*A[8,9]+
+    1*(x--1)*(x--0.75)*(x--0.5)*(x--0.25)*(x-0)*(x-0.25)*(x-0.5)*(x-0.75)*A[9,10]
+}
+Ej.5.c.N.vol2 = Interpolo_a_partir_del_Polinomio_de_Newton(0.9)
+#Da igual. Esta corroborado por todos los metodos que es el resultado correcto
+
+
+#d----
+#grafico los puntos
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+plot(x,fx,pch = 21,cex=1.5,lwd=0.5,bg="black", ylim = c(-2,1))
+#grafico PL
+A=cbind(x,fx)
+m=A[,1]
+n=A[,2]
+if(length(m)!=length(n)){
+  return("La cantidad de argumentos no coincide")
+}
+B=seq(m[1],m[length(m)],length.out = 1000) #los valores sobre los cuales se interpolará para graficar
+Fx=c() #se genera el vector en el cual se guardan las interpolaciones
+#Interpolo todos los valores para despues graficar
+for(h in 1:length(B)){
+  interpolador=0
+  for(i in 1:length(m)){
+    u=1
+    v=1
+    l=n[i]
+    for(j in 1:length(m)){
+      if(i!=j){
+        u=u*(B[h]-m[j])
+        v=v*(m[i]-m[j])
+        l=l*(B[h]-m[j])/(m[i]-m[j])
+      }
+    }
+    interpolador=interpolador+l
+  }
+  Fx=c(Fx,interpolador) #se van guardando las interpolaciones
+}
+lines(B,Fx, col = "red")
+
+
+#grafico PN
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+
+b=nrow(A)-1    #este fragmento del codigo se corresponde al calculo de las diferencias div.
+n=A[,1]  
+m=A[,2]
+B=seq(n[1],n[length(n)],length.out = 1000)  #los valores sobre los cuales se interpolará para graficar. 
+names=c("x","f(x)")
+b=2   #calculo de las diferencias div
+k=nrow(A)-1
+for(i in 1:k){
+  a=rep(NA,nrow(A)) 
+  for(j in b:nrow(A)){  
+    a[j]=(m[j]-m[j-1])/(n[j]-n[j-ncol(A)+1])  
+  }
+  A=cbind(A,a) 
+  b=b+1
+  m=A[,2+i] 
+}
+coef=NULL
+for(i in 1:nrow(A)){
+  coef = as.vector(c(coef,A[i,i+1]))
+}
+Fx=c()  #se genera vector para guardar las interpolaciones para graficar
+for(h in 1:length(B)){  #para cada uno de los valores del vector B...
+  interpolador=coef[1]  #defino el primer termino del polinomio interpolador (común a todas las interpolaciones de estos datos)
+  for(f in 1:k){  #para cada termino del polinomio interpolador (a partir del segundo)
+    u=1 
+    for(p in 1:f){
+      u=u*(B[h]-n[p]) 
+    }
+    interpolador=interpolador+(coef[f+1])*u  #el valor de la interpolacion es la suma de cada uno de los terminos calculados
+  }
+  Fx=c(Fx,interpolador) #guardo el valor interpolado en el vector que se usa para graficar
+}
+lines(B,Fx, col = "blue" )
+
+
+#e----
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+#tengo una funcion que grafica interpola y escribe el trazador
+#Voy a modificar la funcion para que solo traiga el trazador y no haga el resto
+Natural_Cubic_Spline_SoloPol = function(A){
+  #Variables iniciales ----
+  x = A[,1]
+  fx = A[,2]
+  if(length(x)!=length(fx)){
+    return("La cantidad de argumentos no coincide")
+  }
+  n = length(A[,1]); b = c(rep(NA,n)); c = c(rep(NA,n)); d = c(rep(NA,n)); h = c(rep(NA,n))
+  a = c(rep(NA,n)); l = c(rep(NA,n)); u = c(rep(NA,n)); z = c(rep(NA,n))
+  #Paso 1 y 2 ----
+  for(i in 1:(n-1)){
+    h[i] = x[i+1]-x[i]
+  }
+  for(i in 2:(n-1)){
+    a[i] = ((3/(h[i])) * (fx[i+1]- fx[i])) - ((3/(h[i-1])) * (fx[i]- fx[i-1]))
+  }
+  #Paso 3 ----
+  l[1] = 1;u[1] = 0;z[1] = 0
+  #Paso 4 ----
+  for(i in 2:(n-1)){
+    l[i] = 2*(x[i+1] - x[i-1]) - (h[i-1]*u[i-1])
+    u[i] = h[i]/l[i]
+    z[i] = (a[i]- h[i-1]*z[i-1])/l[i] 
+  }
+  #Paso 5 ----
+  l[n] = 1 ;z[n] = 0;c[n] = 0
+  #Paso 6 ----
+  for(j in (n-1):1){
+    c[j] = z[j] - (u[j]*c[j+1])
+    b[j] = ((fx[j+1] - fx[j])/h[j]) - h[j]*(c[j+1] + 2*c[j])/3
+    d[j] = (c[j+1] - c[j])/(3*h[j])
+  }
+  Pol = NULL
+  for(i in 1:(n-1)){
+    Pol = c(Pol,paste("",fx[i],"+(",b[i],"*(x-",x[i],"))+(",c[i],"*((x-",x[i],")^2))+(",d[i],"*((x-",x[i],")^3))   para todo x perteneciente a [",x[i],",",x[i+1],"]",sep = ""))
+  }
+  Pol = matrix(Pol,nrow = (n-1), ncol = 1, byrow = T)
+  e = NULL
+  for(i in 1:(n-1)){
+    e = c(e,paste("S.",i,"(x) = ",sep = ""))
+  }
+  dimnames(Pol) = list(e,NULL)
+  return(Pol)
+}
+Ej.5.e = Natural_Cubic_Spline_SoloPol(A)  
+Ej.5.e
+
+#el trazador esta compuesto por los siguientes polinomios cubicos:
+
+#S.1(x) =  "0.0385+(0.0624123711340206*(x--1))+(0*((x--1)^2))+(0.78700206185567*((x--1)^3))   para todo x perteneciente a [-1,-0.75]"                           
+#S.2(x) =  "0.0664+(0.209975257731959*(x--0.75))+(0.590251546391752*((x--0.75)^2))+(-1.14461030927835*((x--0.75)^3))   para todo x perteneciente a [-0.75,-0.5]"
+#S.3(x) =  "0.1379+(0.290486597938144*(x--0.5))+(-0.26820618556701*((x--0.5)^2))+(12.5722391752577*((x--0.5)^3))   para todo x perteneciente a [-0.5,-0.25]"    
+#S.4(x) =  "0.3902+(2.51367835051546*(x--0.25))+(9.16097319587629*((x--0.25)^2))+(-37.8355463917526*((x--0.25)^3))   para todo x perteneciente a [-0.25,0]"     
+#S.5(x) =  "1+(0*(x-0))+(-19.2156865979381*((x-0)^2))+(37.8355463917526*((x-0)^3))   para todo x perteneciente a [0,0.25]"                                      
+#S.6(x) =  "0.3902+(-2.51367835051546*(x-0.25))+(9.16097319587629*((x-0.25)^2))+(-12.5722391752577*((x-0.25)^3))   para todo x perteneciente a [0.25,0.5]"      
+#S.7(x) =  "0.1379+(-0.290486597938144*(x-0.5))+(-0.268206185567011*((x-0.5)^2))+(1.14461030927835*((x-0.5)^3))   para todo x perteneciente a [0.5,0.75]"       
+#S.8(x) =  "0.0664+(-0.209975257731959*(x-0.75))+(0.590251546391753*((x-0.75)^2))+(-0.78700206185567*((x-0.75)^3))   para todo x perteneciente a [0.75,1]
+
+
+#f----
+#voy a modificar la funcion para que solo interpole y no grafique
+Natural_Cubic_Spline_SinGraficar = function(A,xk){
+  #Variables iniciales ----
+  x = A[,1]
+  fx = A[,2]
+  if(length(x)!=length(fx)){
+    return("La cantidad de argumentos no coincide")
+  }
+  n = length(A[,1]); b = c(rep(NA,n)); c = c(rep(NA,n)); d = c(rep(NA,n)); h = c(rep(NA,n))
+  a = c(rep(NA,n)); l = c(rep(NA,n)); u = c(rep(NA,n)); z = c(rep(NA,n))
+  #Paso 1 y 2 ----
+  for(i in 1:(n-1)){
+    h[i] = x[i+1]-x[i]
+  }
+  for(i in 2:(n-1)){
+    a[i] = ((3/(h[i])) * (fx[i+1]- fx[i])) - ((3/(h[i-1])) * (fx[i]- fx[i-1]))
+  }
+  #Paso 3 ----
+  l[1] = 1;u[1] = 0;z[1] = 0
+  #Paso 4 ----
+  for(i in 2:(n-1)){
+    l[i] = 2*(x[i+1] - x[i-1]) - (h[i-1]*u[i-1])
+    u[i] = h[i]/l[i]
+    z[i] = (a[i]- h[i-1]*z[i-1])/l[i] 
+  }
+  #Paso 5 ----
+  l[n] = 1 ;z[n] = 0;c[n] = 0
+  #Paso 6 ----
+  for(j in (n-1):1){
+    c[j] = z[j] - (u[j]*c[j+1])
+    b[j] = ((fx[j+1] - fx[j])/h[j]) - h[j]*(c[j+1] + 2*c[j])/3
+    d[j] = (c[j+1] - c[j])/(3*h[j])
+  }
+  #interpolacion en el punto ----
+  for(i in 1:(n-1)) {
+    if(x[i]<= xk & x[i+1]>= xk){
+      s = i}
+  } #Nos fijamos a que polinomio pertenece el valor a interpolar
+  yk = fx[s]+b[s]*(xk-x[s])+c[s]*(xk-x[s])^2+d[s]*(xk-x[s])^3 #Lo valuamos en el polinomio correspondiente
+  return(yk)
+}
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+A=cbind(x,fx)
+Ej5.f = Natural_Cubic_Spline_SinGraficar(A,0.9)
+Ej5.f
+#dan resultados muy lejanos en comparacion el trazador cubico y el polinomio interpolante de lagrange
+#esto se debe a que en lo extremos (como 0,9), sobre todo, suele fallar el polinomio de lagrange al interpolar y tiende a irse mucho del recorrido
+#esperado
+
+
+#g-----
+x=c(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1)
+fx=c(0.0385,0.0664,0.1379,0.3902,1,0.3902,0.1379,0.0664,0.0385)
+#para añadir al grafico el trazador voy a interpolar en 1000 puntos, usando como base la funcion que tenia programada
+x = A[,1]
+fx = A[,2]
+if(length(x)!=length(fx)){
+  return("La cantidad de argumentos no coincide")
+}
+n = length(A[,1]); b = c(rep(NA,n)); c = c(rep(NA,n)); d = c(rep(NA,n)); h = c(rep(NA,n))
+a = c(rep(NA,n)); l = c(rep(NA,n)); u = c(rep(NA,n)); z = c(rep(NA,n))
+#Paso 1 y 2 ----
+for(i in 1:(n-1)){
+  h[i] = x[i+1]-x[i]
+}
+for(i in 2:(n-1)){
+  a[i] = ((3/(h[i])) * (fx[i+1]- fx[i])) - ((3/(h[i-1])) * (fx[i]- fx[i-1]))
+}
+#Paso 3 ----
+l[1] = 1;u[1] = 0;z[1] = 0
+#Paso 4 ----
+for(i in 2:(n-1)){
+  l[i] = 2*(x[i+1] - x[i-1]) - (h[i-1]*u[i-1])
+  u[i] = h[i]/l[i]
+  z[i] = (a[i]- h[i-1]*z[i-1])/l[i] 
+}
+#Paso 5 ----
+l[n] = 1 ;z[n] = 0;c[n] = 0
+#Paso 6 ----
+for(j in (n-1):1){
+  c[j] = z[j] - (u[j]*c[j+1])
+  b[j] = ((fx[j+1] - fx[j])/h[j]) - h[j]*(c[j+1] + 2*c[j])/3
+  d[j] = (c[j+1] - c[j])/(3*h[j])
+}
+B = seq(x[1],x[length(x)],length.out = 1000)
+B2 = NULL
+for(r in 1:1000){
+  for(i in 1:(n-1)){
+    if(x[i]<=B[r] & x[i+1]>= B[r]){
+      g = i
+    }
+  }
+  rk = fx[g]+b[g]*(B[r]-x[g])+c[g]*(B[r]-x[g])^2+d[g]*(B[r]-x[g])^3
+  B2 = c(B2,rk)
+} #Interpolamos 1000 numeros para poder graficar
+lines(B,B2, col = "green")
+
+#h----
+#GRAFICO PRECIOS CALCULADOS CON TASAS
+y_en_fc_de_x = function(x){
+  return((1+25*(x)^2)^(-1))
+}
+B = seq(x[1],x[length(x)],length.out = 1000)
+FF=NULL
+for(i in 1:length(B)){
+  FF = c(FF,y_en_fc_de_x(B[i]))
+}
+lines(B,FF, col = "black")
+#podemos observar que el grafico del trazador cubico se aproxima mucho mas al polinomio verdadero sobre todo en los extremos
+#dado que en el centro el polinomio interpolador tambien se aproxima bastante bien
