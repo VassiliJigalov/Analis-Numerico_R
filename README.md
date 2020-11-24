@@ -7,3 +7,4 @@ Algoritmos de resolución de ejercicios númericos en R. Los algoritmos fueron o
   -Secante<br />
   -Falsa Posicion<br />
  <b>Factorizacion Cholesky y LU</b><br />
+ <b>Sistema de ecuaciones no Lineales(senol)</b><br />
