@@ -18,5 +18,5 @@ Algoritmos de resolución de ejercicios númericos en R. Los algoritmos fueron o
   -Metodo de 5 puntos(punto extremo)<br />
   --<b>Derivada segunda:</b><br />
   -Formula de punto medio<br />
- <b>Ecuaciones Diferenciales</b>:<br />
+ <b>Ecuaciones Diferenciales</b><br />
  
