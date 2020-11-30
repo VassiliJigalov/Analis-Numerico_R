@@ -11,5 +11,5 @@ Algoritmos de resolución de ejercicios númericos en R. Los algoritmos fueron o
  <b>Interpolación: Newton, Larange, Cubic Splines</b><br />
  <b>Ecuaciones Diferenciales </b><br />
  <b>Derivacion/Integracion Numerica</b><br />
- <b>Ecuaciones Diferenciales</b><br />
+
  
